@@ -28,6 +28,7 @@ export default async function ContributeFormPage({ params }: { params: Promise<{
       company={company}
       roles={roles}
       profile={{ major: me?.major ?? null, gradYear: me?.gradYear ?? null, gpa: me?.gpa ?? null }}
+      pending={company.status === "PENDING"}
     />
   );
 }

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Logo, type LogoCompany } from "@/components/primitives/Logo";
 import { Icon } from "@/components/primitives/Icon";
 import { INDUSTRIES } from "@/lib/constants";
+import { AddCompanyModal } from "./AddCompanyModal";
 
 type DirCompany = LogoCompany & { slug: string; industry: string; reports: number };
 
@@ -16,6 +17,7 @@ type DirCompany = LogoCompany & { slug: string; industry: string; reports: numbe
 export function DirectoryView({ companies }: { companies: DirCompany[] }) {
   const [query, setQuery] = useState("");
   const [industry, setIndustry] = useState("all");
+  const [adding, setAdding] = useState(false);
   const q = query.trim().toLowerCase();
   const filtered = companies.filter((c) => {
     if (industry !== "all" && c.industry !== industry) return false;
@@ -79,7 +81,10 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="empty-note big">No companies match those filters.</p>
+        <p className="empty-note big">
+          No companies match those filters.{" "}
+          <button className="inline-link" onClick={() => setAdding(true)}>Request a company →</button>
+        </p>
       ) : (
         <section className="company-grid">
           {filtered.map((c) => (
@@ -101,12 +106,20 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
               </div>
             </Link>
           ))}
+          <button className="tile add-tile" onClick={() => setAdding(true)}>
+            <span className="add-tile-plus"><Icon name="plus" size={20} /></span>
+            <div className="tile-info">
+              <div className="tile-name">Request a company</div>
+              <div className="tile-meta">missing one? we&apos;ll verify &amp; add it</div>
+            </div>
+          </button>
         </section>
       )}
 
       <footer className="footer-meta">
         <span className="brand-mini">Intern·vention</span> · built for Stanford · anonymized recruiting data
       </footer>
+      {adding && <AddCompanyModal onClose={() => setAdding(false)} />}
     </main>
   );
 }

@@ -22,7 +22,7 @@ const OFFER_MONTHS = ["Sept 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026
 type FormCompany = LogoCompany & { slug: string; name: string };
 type Profile = { major: string | null; gradYear: string | null; gpa: string | null };
 
-export function ContributeForm({ company, roles, profile }: { company: FormCompany; roles: string[]; profile: Profile }) {
+export function ContributeForm({ company, roles, profile, pending }: { company: FormCompany; roles: string[]; profile: Profile; pending?: boolean }) {
   const router = useRouter();
   const toast = useToast();
   const { data: session, update } = useSession();
@@ -82,9 +82,19 @@ export function ContributeForm({ company, roles, profile }: { company: FormCompa
 
   return (
     <main className="contribute">
-      <button className="back-link" onClick={() => router.push(`/company/${company.slug}`)}>
-        <Icon name="arrow-left" size={13} /> Back to {company.name}
+      <button className="back-link" onClick={() => router.push(pending ? "/contribute" : `/company/${company.slug}`)}>
+        <Icon name="arrow-left" size={13} /> {pending ? "Back" : `Back to ${company.name}`}
       </button>
+
+      {pending && (
+        <div className="pending-co-banner">
+          <span className="pcb-icon"><Icon name="clock" size={15} /></span>
+          <div className="pcb-text">
+            <strong>{company.name} is pending review.</strong> Your story is submitted together with the request — it
+            goes live the moment our team approves the company (usually &lt; 48h). You&apos;re unlocked right away.
+          </div>
+        </div>
+      )}
 
       <header className="contribute-header">
         <Logo company={company} size={56} radius={12} />

@@ -3,12 +3,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo, type LogoCompany } from "@/components/primitives/Logo";
 import { Icon } from "@/components/primitives/Icon";
+import { AddCompanyModal } from "@/components/directory/AddCompanyModal";
 
 type PickerCompany = LogoCompany & { slug: string; industry: string; reports: number };
 
 export function ContributePicker({ companies }: { companies: PickerCompany[] }) {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [adding, setAdding] = useState(false);
   const list = companies.filter((c) => !q || `${c.name} ${c.industry}`.toLowerCase().includes(q.toLowerCase()));
   return (
     <main className="contribute">
@@ -38,6 +40,7 @@ export function ContributePicker({ companies }: { companies: PickerCompany[] }) 
       {list.length === 0 ? (
         <div className="picker-empty">
           <p>No company matches &quot;{q}&quot;.</p>
+          <button className="primary-btn" onClick={() => setAdding(true)}><Icon name="plus" size={13} /> Request a new company</button>
         </div>
       ) : (
         <section className="picker-grid">
@@ -55,6 +58,14 @@ export function ContributePicker({ companies }: { companies: PickerCompany[] }) 
           ))}
         </section>
       )}
+      <button className="picker-add" onClick={() => setAdding(true)}>
+        <span className="add-tile-plus"><Icon name="plus" size={18} /></span>
+        <div className="pt-info">
+          <div className="pt-name">Request a new company</div>
+          <div className="pt-meta">missing one? we&apos;ll verify &amp; add it</div>
+        </div>
+      </button>
+      {adding && <AddCompanyModal onClose={() => setAdding(false)} />}
     </main>
   );
 }

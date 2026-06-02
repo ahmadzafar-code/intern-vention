@@ -32,6 +32,17 @@ export async function getCompany(slug: string) {
   });
 }
 
+export type PendingRequest = { id: string; name: string; slug: string; industry: string; website: string | null; note: string | null };
+
+// Admin review queue — pending company requests, oldest first.
+export async function listPendingRequests(): Promise<PendingRequest[]> {
+  return prisma.companyRequest.findMany({
+    where: { status: "PENDING" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, name: true, slug: true, industry: true, website: true, note: true },
+  });
+}
+
 // Role options for the contribute form: industry defaults ∪ roles already submitted here.
 export async function getCompanyRoles(slug: string, industry: string): Promise<string[]> {
   const rows = await prisma.contribution.findMany({
