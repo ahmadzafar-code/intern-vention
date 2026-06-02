@@ -6,11 +6,11 @@ import { useAuthModal } from "@/components/auth/AuthModal";
 
 // Gate overlay. Two states: signed-in-but-not-unlocked vs signed-out. Never shows email
 // (the prototype did) — uses the public handle.
-export function LockCard({ heading, body, slug }: { heading: string; body: string; slug: string }) {
+export function LockCard({ heading, body, slug }: { heading: string; body: string; slug?: string }) {
   const router = useRouter();
   const { status, data: session } = useSession();
   const { openSignIn } = useAuthModal();
-  const goContribute = () => router.push(`/contribute/${slug}`);
+  const goContribute = () => router.push(slug ? `/contribute/${slug}` : "/contribute");
 
   if (status === "authenticated") {
     return (
