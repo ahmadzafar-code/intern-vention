@@ -11,6 +11,12 @@ export function hasGraduated(gradYear: string): boolean {
   return Number.isFinite(n) && n < currentYear();
 }
 
+/** Show the "still Class of 20XX?" banner: hasn't confirmed this calendar year, not graduated. */
+export function profileStale(confirmedYear: number | null | undefined, gradYear: string | null | undefined): boolean {
+  if (!gradYear || gradYear === "Already graduated" || hasGraduated(gradYear)) return false;
+  return (confirmedYear ?? 0) < currentYear();
+}
+
 /** Map a graduating class year to the prototype's class-year label (used on contributions). */
 export function gradToYear(gradYear: string): string {
   const y = parseInt(gradYear, 10);

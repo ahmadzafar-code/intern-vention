@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isUnlocked } from "@/lib/session";
+import { FollowButton } from "@/components/company/FollowButton";
 import { getCompany, getCompanyRoles } from "@/lib/queries/companies";
 import { cohortReport, MIN } from "@/lib/queries/report";
 import { Logo } from "@/components/primitives/Logo";
@@ -33,12 +35,17 @@ export default async function CompanyPage({
     gpa: str(sp.gpa) || "All",
   };
 
+  const session = await auth();
   const unlocked = await isUnlocked();
-  const [report, roles, total] = await Promise.all([
+  const [report, roles, total, follow] = await Promise.all([
     cohortReport(slug, filters, unlocked),
     getCompanyRoles(slug, company.industry),
     prisma.contribution.count({ where: { companySlug: slug } }),
+    session?.user
+      ? prisma.follow.findUnique({ where: { userId_companySlug: { userId: session.user.id, companySlug: slug } }, select: { id: true } })
+      : Promise.resolve(null),
   ]);
+  const following = follow !== null;
 
   return (
     <main className="main" style={{ maxWidth: 1180, margin: "0 auto", padding: "var(--page-pad)" }}>
@@ -61,6 +68,7 @@ export default async function CompanyPage({
             <span>{roles.length} roles tracked</span>
           </div>
         </div>
+        <FollowButton slug={slug} following={following} />
       </header>
 
       <CompanyControls roles={roles} current={filters} />
