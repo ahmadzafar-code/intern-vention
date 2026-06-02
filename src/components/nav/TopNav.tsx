@@ -7,6 +7,7 @@ import { routePath } from "@/lib/nav";
 import { Icon } from "@/components/primitives/Icon";
 import { Avatar } from "@/components/primitives/Avatar";
 import { useAuthModal } from "@/components/auth/AuthModal";
+import { useCommandPalette } from "@/components/nav/CommandPalette";
 import { getUnreadCount } from "@/app/actions/notifications";
 
 export function TopNav() {
@@ -14,6 +15,7 @@ export function TopNav() {
   const router = useRouter();
   const { status, data: session } = useSession();
   const { openSignIn } = useAuthModal();
+  const { open: openPalette } = useCommandPalette();
   const [menu, setMenu] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -48,7 +50,7 @@ export function TopNav() {
   return (
     <nav className="topnav">
       <Link className="brand" href="/">Intern<span className="dot">·</span>vention</Link>
-      <button className="nav-search" onClick={() => { /* TODO(P12): command palette */ }}>
+      <button className="nav-search" onClick={openPalette}>
         <Icon name="search" size={14} /> Search companies, roles, majors…
         <kbd className="nav-search-kbd">⌘K</kbd>
       </button>
