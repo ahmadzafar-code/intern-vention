@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Reference-only prototype (not shipped) — do not lint.
+    "prototype_src/**",
   ]),
 ]);
 
