@@ -7,14 +7,10 @@ import { Icon } from "@/components/primitives/Icon";
 import { useToast } from "@/components/primitives/ToastHost";
 import { fireConfetti } from "@/components/primitives/confetti";
 import { contribute } from "@/app/actions/contribute";
+import { COMP_BUCKETS } from "@/lib/constants";
 
 const ADD_ROLE = "+ Add a different role";
 const CYCLES = ["2025–26", "2024–25", "2023–24", "2022–23"];
-const COMP_BUCKETS = [
-  "< $5k/mo · < $60k/yr", "$5–7k/mo · ~$60–84k/yr", "$7–8k/mo · ~$84–96k/yr", "$8–10k/mo · ~$96–120k/yr",
-  "$10–12k/mo · ~$120–144k/yr", "$12–14k/mo · ~$144–168k/yr", "$14–16k/mo · ~$168–192k/yr",
-  "$16k+/mo · $192k+/yr", "Prefer not to say",
-];
 const PLATFORMS = ["Company website", "Handshake", "LinkedIn", "Career fair", "Cold email", "Other"];
 const REFERRAL_SOURCES = [
   "Stanford student club", "Coffee chat", "Cold email", "LinkedIn cold outreach", "Previous workplace",

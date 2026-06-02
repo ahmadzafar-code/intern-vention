@@ -35,6 +35,15 @@ export async function requireUnlocked() {
   return user;
 }
 
+// Non-throwing unlock check for RSC reads (the report page gates UI off this, while
+// still computing n≥5 server-side). Authorization for mutations uses requireUnlocked.
+export async function isUnlocked(): Promise<boolean> {
+  const user = await getSessionUser();
+  if (!user) return false;
+  const n = await prisma.contribution.count({ where: { userId: user.id } });
+  return n >= 1;
+}
+
 export async function requireAdmin() {
   const user = await requireSession();
   const dbUser = await prisma.user.findUnique({

@@ -49,3 +49,13 @@ export const ROLE_SETS: Record<string, string[]> = {
 export function rolesForIndustry(industry: string): string[] {
   return ROLE_SETS[industry] ?? ROLE_SETS.tech;
 }
+
+// Contribution-form compensation buckets (ordered low→high; used by the form and by the
+// report's median-comp calc) and the apply/offer timeline month axis (Aug→Jul).
+export const COMP_BUCKETS = [
+  "< $5k/mo · < $60k/yr", "$5–7k/mo · ~$60–84k/yr", "$7–8k/mo · ~$84–96k/yr", "$8–10k/mo · ~$96–120k/yr",
+  "$10–12k/mo · ~$120–144k/yr", "$12–14k/mo · ~$144–168k/yr", "$14–16k/mo · ~$168–192k/yr",
+  "$16k+/mo · $192k+/yr", "Prefer not to say",
+];
+
+export const MONTHS = ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
