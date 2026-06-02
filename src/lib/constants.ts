@@ -59,3 +59,13 @@ export const COMP_BUCKETS = [
 ];
 
 export const MONTHS = ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+
+export const INDUSTRIES: { key: string; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "tech", label: "Tech" },
+  { key: "finance", label: "Finance" },
+  { key: "consulting", label: "Consulting" },
+  { key: "quant", label: "Quant" },
+  { key: "startups", label: "Startups" },
+  { key: "design", label: "Design" },
+];
