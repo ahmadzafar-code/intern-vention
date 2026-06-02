@@ -7,6 +7,7 @@ import { routePath } from "@/lib/nav";
 import { Icon } from "@/components/primitives/Icon";
 import { Avatar } from "@/components/primitives/Avatar";
 import { useAuthModal } from "@/components/auth/AuthModal";
+import { getUnreadCount } from "@/app/actions/notifications";
 
 export function TopNav() {
   const pathname = usePathname();
@@ -23,6 +24,12 @@ export function TopNav() {
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
+
+  // Unread notifications badge — re-fetched on navigation (and after marking read).
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    if (status === "authenticated") getUnreadCount().then(setUnread).catch(() => {});
+  }, [status, pathname]);
 
   const signedIn = status === "authenticated";
   const user = session?.user;
@@ -50,7 +57,9 @@ export function TopNav() {
         <Link className={active === "community" ? "active" : ""} href={routePath({ name: "community", scope: "__main__" })}>Community</Link>
         <Link className={active === "mentorboard" ? "active" : ""} href={routePath({ name: "mentorboard" })}>Mentorboard</Link>
         <Link className={active === "me" ? "active" : ""} href={routePath({ name: "contributions" })}>My Contributions</Link>
-        <Link className={"nav-alerts" + (active === "alerts" ? " active" : "")} href={routePath({ name: "alerts" })}>Alerts</Link>
+        <Link className={"nav-alerts" + (active === "alerts" ? " active" : "")} href={routePath({ name: "alerts" })}>
+          Alerts{signedIn && unread > 0 && <span className="nav-badge">{unread}</span>}
+        </Link>
         {!signedIn ? (
           <button className="signin-nav-btn" onClick={openSignIn}>Sign in</button>
         ) : (

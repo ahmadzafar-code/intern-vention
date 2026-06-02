@@ -16,15 +16,30 @@ export async function addComment(
   const user = await requireUnlocked();
   const text = body.trim();
   if (text.length < 2) return { ok: false, error: "Say a bit more" };
-  const post = await prisma.post.findUnique({ where: { id: postId }, select: { id: true } });
+  const post = await prisma.post.findUnique({ where: { id: postId }, select: { userId: true } });
   if (!post) return { ok: false, error: "Post not found" };
+  let targetUserId = post.userId; // top-level comment → notify the post author
   if (parentId) {
-    const parent = await prisma.comment.findUnique({ where: { id: parentId }, select: { postId: true } });
+    const parent = await prisma.comment.findUnique({ where: { id: parentId }, select: { postId: true, userId: true } });
     if (!parent || parent.postId !== postId) return { ok: false, error: "Bad reply target" };
+    targetUserId = parent.userId; // reply → notify the parent comment author
   }
   const comment = await prisma.comment.create({ data: { postId, parentId: parentId ?? null, userId: user.id, body: text } });
   await prisma.vote.create({ data: { userId: user.id, targetType: "COMMENT", targetId: comment.id, dir: 1 } });
-  // TODO(P9): notify the post/parent author here (the reply→alert loop) when != self.
+  // reply→notification loop (skip self-replies)
+  if (targetUserId && targetUserId !== user.id) {
+    await prisma.notification.create({
+      data: {
+        recipientId: targetUserId,
+        type: "reply",
+        actor: user.username,
+        title: parentId ? "replied to your comment" : "commented on your post",
+        body: text.slice(0, 120),
+        scope,
+        postId,
+      },
+    });
+  }
   revalidatePath(threadPath(scope, postId));
   return { ok: true, commentId: comment.id };
 }
