@@ -27,7 +27,7 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
   const hasSearch = !!q || industry !== "all";
 
   return (
-    <main className="page" style={{ maxWidth: 960, margin: "0 auto" }}>
+    <main className="page">
       <section className="hero">
         <div className="hero-eyebrow">Intern<span className="dot">·</span>vention</div>
         <h1>

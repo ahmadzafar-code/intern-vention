@@ -10,6 +10,8 @@ import { Icon } from "@/components/primitives/Icon";
 import { CompanyControls } from "@/components/company/CompanyControls";
 import { MajorPie, ChannelDonut, TimingChart, RoundsBreakdown } from "@/components/company/Charts";
 import { LockCard } from "@/components/company/LockCard";
+import { CommunityThread } from "@/components/feed/CommunityThread";
+import { getPosts } from "@/lib/queries/feed";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
@@ -38,18 +40,36 @@ export default async function CompanyPage({
   // (cohortReport needs `unlocked`, so it follows). Co-located with the DB this is fast.
   const session = await auth();
   const userId = session?.user?.id ?? null;
-  const [unlockedCount, roles, total, follow] = await Promise.all([
+  const [unlockedCount, roles, total, follow, threadCount] = await Promise.all([
     userId ? prisma.contribution.count({ where: { userId } }) : Promise.resolve(0),
     getCompanyRoles(slug, company.industry),
     prisma.contribution.count({ where: { companySlug: slug } }),
     userId ? prisma.follow.findUnique({ where: { userId_companySlug: { userId, companySlug: slug } }, select: { id: true } }) : Promise.resolve(null),
+    prisma.post.count({ where: { scope: slug } }),
   ]);
   const unlocked = unlockedCount >= 1;
   const following = follow !== null;
-  const report = await cohortReport(slug, filters, unlocked);
+  const [report, threadPosts] = await Promise.all([
+    cohortReport(slug, filters, unlocked),
+    unlocked ? getPosts(slug, userId) : Promise.resolve([]),
+  ]);
 
   return (
-    <main className="main" style={{ maxWidth: 1180, margin: "0 auto", padding: "var(--page-pad)" }}>
+    <div className="layout">
+      <CommunityThread
+        scope={slug}
+        label="Community Thread"
+        name="iv.stanford/"
+        nameStrong={company.name}
+        meta={`${threadCount} post${threadCount === 1 ? "" : "s"} this cycle`}
+        lockHeading="Contribute to unlock"
+        lockBody={`Add your ${company.name} recruiting story to unlock the Community Thread for this company.`}
+        lockSlug={slug}
+        posts={threadPosts}
+        unlocked={unlocked}
+        live
+      />
+      <main className="main">
       <div className="page-url">
         <Icon name="lock" size={12} />
         <code>
@@ -208,6 +228,7 @@ export default async function CompanyPage({
           )}
         </>
       )}
-    </main>
+      </main>
+    </div>
   );
 }
