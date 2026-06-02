@@ -1,8 +1,16 @@
 "use client";
 import type { ReactNode } from "react";
+import { SessionProvider } from "next-auth/react";
 import { ToastHost } from "@/components/primitives/ToastHost";
+import { AuthModalProvider } from "@/components/auth/AuthModal";
 
-// Client provider boundary. P3 adds <SessionProvider>; P4 adds the auth-modal trigger context.
+// Client provider boundary: session, toasts, and the auth/onboarding modal.
 export function Providers({ children }: { children: ReactNode }) {
-  return <ToastHost>{children}</ToastHost>;
+  return (
+    <SessionProvider>
+      <ToastHost>
+        <AuthModalProvider>{children}</AuthModalProvider>
+      </ToastHost>
+    </SessionProvider>
+  );
 }

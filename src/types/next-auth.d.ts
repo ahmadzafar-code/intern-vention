@@ -1,8 +1,8 @@
-import type { DefaultSession } from "next-auth";
+// Session/JWT shape for the anonymity contract. `email` is intentionally absent from the
+// Session user type (only id, public handle, gating flags, and display name/image) — so
+// reading session.user.email is a compile error. `export {}` keeps this a module so the
+// `declare module` blocks augment (rather than redeclare) the target modules.
 
-// Session/JWT shape for the anonymity contract. `email` is deliberately Omit-ted from
-// the session user type, so reading session.user.email is a compile error — the only
-// fields exposed are the opaque id, the public handle, and the gating flags.
 declare module "next-auth" {
   interface Session {
     user: {
@@ -10,14 +10,15 @@ declare module "next-auth" {
       username: string | null;
       unlocked: boolean;
       profileSet: boolean;
-    } & Omit<DefaultSession["user"], "email">;
+      name?: string | null;
+      image?: string | null;
+    };
   }
 }
 
-// Augment the SOURCE module: next-auth/jwt only type-re-exports JWT from @auth/core/jwt,
-// so augmenting next-auth/jwt creates a separate, non-merging interface. The jwt callback's
-// `token` is typed from @auth/core/jwt, so this is the declaration that actually merges.
 declare module "@auth/core/jwt" {
+  // next-auth/jwt only type-re-exports JWT from @auth/core/jwt, so this is the
+  // declaration the jwt callback's `token` actually merges with.
   interface JWT {
     userId?: string;
     username?: string | null;
@@ -25,3 +26,5 @@ declare module "@auth/core/jwt" {
     profileSet?: boolean;
   }
 }
+
+export {};

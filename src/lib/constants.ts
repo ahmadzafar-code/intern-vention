@@ -1,0 +1,36 @@
+// Pure constants ported verbatim from prototype_src/src/data.js. Client-safe (no DB,
+// no server-only imports) so forms/modals can import them directly.
+
+export const DEGREE_LEVELS = [
+  "Bachelor's (B.S./B.A.)",
+  "Coterm (B.S. + M.S.)",
+  "Master's (M.S./M.A.)",
+  "PhD",
+] as const;
+
+export const DEGREE_FILTERS = ["Bachelor's", "Coterm", "Master's", "PhD"] as const;
+
+export const STANFORD_MAJORS = [
+  "Computer Science", "Symbolic Systems", "Mathematical & Computational Science", "Mathematics", "Statistics",
+  "Data Science", "Management Science & Engineering", "Economics", "Electrical Engineering", "Mechanical Engineering",
+  "Bioengineering", "Chemical Engineering", "Civil & Environmental Engineering", "Materials Science & Engineering",
+  "Aeronautics & Astronautics", "Engineering Physics", "Product Design", "Physics", "Chemistry", "Biology",
+  "Human Biology", "Biomedical Computation", "Earth Systems", "Geological Sciences", "Geophysics", "Environmental Systems Engineering",
+  "Psychology", "Political Science", "International Relations", "Public Policy", "Sociology", "Anthropology",
+  "Economics & Mathematics", "History", "Philosophy", "English", "Comparative Literature", "Linguistics",
+  "Communication", "Science, Technology & Society", "Urban Studies", "American Studies", "Art History",
+  "Art Practice", "Film & Media Studies", "Music", "Theater & Performance Studies", "Classics", "Religious Studies",
+  "Archaeology", "Feminist, Gender & Sexuality Studies", "African & African American Studies", "Asian American Studies",
+  "Chicana/o–Latina/o Studies", "Comparative Studies in Race & Ethnicity", "East Asian Studies", "French", "German Studies",
+  "Iberian & Latin American Cultures", "Italian", "Slavic Languages & Literatures", "Other",
+];
+
+export const STANFORD_MINORS = ["None", ...STANFORD_MAJORS.filter((m) => m !== "Other"), "Other"];
+
+export const GRAD_CLASS_YEARS = (() => {
+  const a: string[] = [];
+  for (let y = 2030; y >= 1965; y--) a.push(String(y));
+  return a;
+})();
+
+export const GPA_BUCKETS = ["3.9 – 4.0", "3.7 – 3.9", "3.4 – 3.7", "3.0 – 3.4", "Below 3.0", "Prefer not to say"];
