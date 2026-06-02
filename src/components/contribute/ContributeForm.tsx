@@ -1,0 +1,305 @@
+"use client";
+import { useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Logo, type LogoCompany } from "@/components/primitives/Logo";
+import { Icon } from "@/components/primitives/Icon";
+import { useToast } from "@/components/primitives/ToastHost";
+import { fireConfetti } from "@/components/primitives/confetti";
+import { contribute } from "@/app/actions/contribute";
+
+const ADD_ROLE = "+ Add a different role";
+const CYCLES = ["2025–26", "2024–25", "2023–24", "2022–23"];
+const COMP_BUCKETS = [
+  "< $5k/mo · < $60k/yr", "$5–7k/mo · ~$60–84k/yr", "$7–8k/mo · ~$84–96k/yr", "$8–10k/mo · ~$96–120k/yr",
+  "$10–12k/mo · ~$120–144k/yr", "$12–14k/mo · ~$144–168k/yr", "$14–16k/mo · ~$168–192k/yr",
+  "$16k+/mo · $192k+/yr", "Prefer not to say",
+];
+const PLATFORMS = ["Company website", "Handshake", "LinkedIn", "Career fair", "Cold email", "Other"];
+const REFERRAL_SOURCES = [
+  "Stanford student club", "Coffee chat", "Cold email", "LinkedIn cold outreach", "Previous workplace",
+  "Research lab", "Professor", "Friend", "Classmate", "Other",
+];
+const APPLIED_MONTHS = ["Aug 2025", "Sept 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026"];
+const OFFER_MONTHS = ["Sept 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026", "Mar 2026"];
+
+type FormCompany = LogoCompany & { slug: string; name: string };
+type Profile = { major: string | null; gradYear: string | null; gpa: string | null };
+
+export function ContributeForm({ company, roles, profile }: { company: FormCompany; roles: string[]; profile: Profile }) {
+  const router = useRouter();
+  const toast = useToast();
+  const { data: session, update } = useSession();
+
+  const [role, setRole] = useState(roles[0] ?? ADD_ROLE);
+  const [customRole, setCustomRole] = useState("");
+  const [cycle, setCycle] = useState("2025–26");
+  const [platform, setPlatform] = useState("Company website");
+  const [customPlatform, setCustomPlatform] = useState("");
+  const [hadReferral, setHadReferral] = useState(false);
+  const [referralSource, setReferralSource] = useState("");
+  const [customReferral, setCustomReferral] = useState("");
+  const [techRounds, setTechRounds] = useState(3);
+  const [behavioralRounds, setBehavioralRounds] = useState(1);
+  const [applied, setApplied] = useState("Sept 2025");
+  const [offerMonth, setOfferMonth] = useState("Nov 2025");
+  const [comp, setComp] = useState("$8–10k/mo · ~$96–120k/yr");
+  const [advice, setAdvice] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const ROLES = [...roles, ADD_ROLE];
+  const finalRole = role === ADD_ROLE ? customRole.trim() || "Other role" : role;
+  const finalPlatform = platform === "Other" ? customPlatform.trim() || "Other" : platform;
+  const finalReferral = !hadReferral ? "" : referralSource === "Other" ? customReferral.trim() || "Other" : referralSource;
+
+  const submit = async () => {
+    if (busy) return;
+    setBusy(true);
+    const res = await contribute({
+      slug: company.slug,
+      role: finalRole,
+      cycle,
+      platform: finalPlatform,
+      hadReferral,
+      referralSource: finalReferral,
+      techRounds,
+      behavioralRounds,
+      applied,
+      offerMonth,
+      comp,
+      advice,
+    });
+    if (!res.ok) {
+      setBusy(false);
+      toast(res.error, { icon: "x" });
+      return;
+    }
+    fireConfetti();
+    toast("Unlocked! +120 karma · earned Verified + Storyteller", { icon: "check", tone: "good", duration: 3400 });
+    await update(); // flip the nav's unlocked hint (the report page reads truth from the DB)
+    setTimeout(() => router.push(`/company/${company.slug}`), 450);
+  };
+
+  const profileLine = profile.major
+    ? `${profile.major} · ${profile.gradYear === "Already graduated" ? "Alum" : "Class of " + profile.gradYear}${profile.gpa ? " · " + profile.gpa : ""}`
+    : "set at sign-in";
+
+  return (
+    <main className="contribute">
+      <button className="back-link" onClick={() => router.push(`/company/${company.slug}`)}>
+        <Icon name="arrow-left" size={13} /> Back to {company.name}
+      </button>
+
+      <header className="contribute-header">
+        <Logo company={company} size={56} radius={12} />
+        <div className="header-info">
+          <h1>
+            How did you get <span className="accent">{company.name}</span>?
+          </h1>
+          <p className="lede">
+            Takes 90 seconds. All entries are aggregated and anonymous — your name is never attached. Submitting unlocks
+            the {company.name} cohort report and Community Thread.
+          </p>
+          <div className="header-meta">
+            <span className="badge-verified">
+              <Icon name="check-circle" size={12} /> u/{session?.user?.username ?? "you"} · anonymous
+            </span>
+            <span className="badge-time">
+              <Icon name="user" size={12} /> {profileLine}
+            </span>
+            <button className="change-co" onClick={() => router.push("/contribute")}>
+              Change company
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="cform">
+        <section className="form-section">
+          <div className="csec-head">
+            <h2>The role</h2>
+          </div>
+          <div className="form-grid g3">
+            <Field label="Role">
+              <Select value={role} set={setRole} options={ROLES} />
+            </Field>
+            <Field label="Cycle">
+              <Select value={cycle} set={setCycle} options={CYCLES} />
+            </Field>
+            <Field label={<span>Compensation <span className="opt">(monthly · yearly equiv.)</span></span>}>
+              <Select value={comp} set={setComp} options={COMP_BUCKETS} />
+            </Field>
+          </div>
+          {role === ADD_ROLE && (
+            <div style={{ marginTop: 14 }}>
+              <Field label={<span>New role title <span className="opt">we&apos;ll add it to {company.name}</span></span>} full>
+                <input
+                  className="cinput"
+                  value={customRole}
+                  maxLength={48}
+                  autoFocus
+                  placeholder="e.g. Forward Deployed Engineer Intern"
+                  onChange={(e) => setCustomRole(e.target.value)}
+                />
+              </Field>
+            </div>
+          )}
+        </section>
+
+        <section className="form-section">
+          <div className="csec-head">
+            <h2>How you applied</h2>
+          </div>
+          <Field label="What platform did you use to apply?" full>
+            <Radio value={platform} set={setPlatform} options={PLATFORMS} />
+          </Field>
+          {platform === "Other" && (
+            <div style={{ marginTop: 12 }}>
+              <Field label="Tell us where" full>
+                <input
+                  className="cinput"
+                  value={customPlatform}
+                  maxLength={60}
+                  autoFocus
+                  placeholder="e.g. Hackathon portal, Discord server, university job board…"
+                  onChange={(e) => setCustomPlatform(e.target.value)}
+                />
+              </Field>
+            </div>
+          )}
+          <div className="csec-head" style={{ marginTop: 20 }}>
+            <h3 className="csec-subhead">Referral</h3>
+          </div>
+          <Field label="Did you have a referral?" full>
+            <Radio value={hadReferral ? "Yes" : "No"} set={(v) => setHadReferral(v === "Yes")} options={["No", "Yes"]} />
+          </Field>
+          {hadReferral && (
+            <div style={{ marginTop: 12 }}>
+              <Field label="How did you get the referral?" full>
+                <Radio value={referralSource} set={setReferralSource} options={REFERRAL_SOURCES} />
+              </Field>
+              {referralSource === "Other" && (
+                <div style={{ marginTop: 12 }}>
+                  <Field label="Tell us how" full>
+                    <input
+                      className="cinput"
+                      value={customReferral}
+                      maxLength={60}
+                      autoFocus
+                      placeholder="e.g. family friend, hackathon teammate…"
+                      onChange={(e) => setCustomReferral(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+          )}
+          <div className="csec-head" style={{ marginTop: 20 }}>
+            <h3 className="csec-subhead">Interview rounds</h3>
+            <span className="csec-meta">leave behavioral at 0 if not applicable</span>
+          </div>
+          <div className="form-grid" style={{ marginTop: 12 }}>
+            <Field label={<span>Technical rounds <span className="opt">(OA, coding, case)</span></span>}>
+              <Stepper value={techRounds} set={setTechRounds} min={0} max={9} />
+            </Field>
+            <Field label={<span>Behavioral rounds <span className="opt">(fit, &quot;why us&quot;)</span></span>}>
+              <Stepper value={behavioralRounds} set={setBehavioralRounds} min={0} max={6} />
+            </Field>
+          </div>
+          <div className="csec-head" style={{ marginTop: 20 }}>
+            <h3 className="csec-subhead">Timeline</h3>
+            <span className="csec-meta">when you applied → when you got the final offer</span>
+          </div>
+          <div className="form-grid" style={{ marginTop: 12 }}>
+            <Field label="Applied">
+              <Select value={applied} set={setApplied} options={APPLIED_MONTHS} />
+            </Field>
+            <Field label="Final offer received">
+              <Select value={offerMonth} set={setOfferMonth} options={OFFER_MONTHS} />
+            </Field>
+          </div>
+        </section>
+
+        <section className="form-section">
+          <div className="csec-head">
+            <h2>What&apos;s not on your LinkedIn that helped you get this job?</h2>
+            <span className="csec-meta">Stanford-specific · appears in Advice</span>
+          </div>
+          <p className="csec-sub">The real, unpolished stuff that actually moved the needle. A few things worth covering:</p>
+          <ul className="advice-prompts">
+            <li><strong>Resources you used to prepare</strong> — specific courses, books, problem sets, mock platforms</li>
+            <li><strong>Networking tips</strong> — who you reached out to, what message worked, the alum/coffee chat that helped</li>
+            <li><strong>Stanford-specific advice</strong> — clubs, classes, section leaders, research labs, professors</li>
+            <li><strong>The make-or-break moment</strong> — the thing you&apos;d never put on a resume</li>
+          </ul>
+          <textarea
+            className="ctextarea"
+            value={advice}
+            onChange={(e) => setAdvice(e.target.value)}
+            placeholder="A Sigma Nu alum at the company hopped on a call and walked me through their interview loop. CS 161 with that one section leader is the reason I cleared the algo round. I drilled NeetCode 150 + did 3 Pramp mocks. Honestly, the Stanford name on the resume got the recruiter to actually open it…"
+          />
+        </section>
+      </div>
+
+      <div className="form-footer">
+        <p className="privacy-note">
+          By submitting, your anonymized data appears in cohort reports for {company.name}. You can edit or delete
+          anytime.
+        </p>
+        <button className="submit-btn" onClick={submit} disabled={busy}>
+          {busy ? "Submitting…" : "Submit & unlock →"}
+        </button>
+      </div>
+    </main>
+  );
+}
+
+function Field({ label, full, children }: { label: ReactNode; full?: boolean; children: ReactNode }) {
+  return (
+    <div className={"field" + (full ? " full" : "")}>
+      <label>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function Radio({ value, set, options }: { value: string; set: (v: string) => void; options: string[] }) {
+  return (
+    <div className="radio-group">
+      {options.map((o) => (
+        <button type="button" key={o} className={"radio-chip" + (value === o ? " selected" : "")} onClick={() => set(o)}>
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Select({ value, set, options }: { value: string; set: (v: string) => void; options: string[] }) {
+  return (
+    <div className="select-wrap">
+      <select className="cinput" value={value} onChange={(e) => set(e.target.value)}>
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+      <Icon name="chevron-down" size={12} className="select-chev" />
+    </div>
+  );
+}
+
+function Stepper({ value, set, min, max, step = 1 }: { value: number; set: (v: number) => void; min: number; max: number; step?: number }) {
+  return (
+    <div className="stepper">
+      <button onClick={() => set(Math.max(min, value - step))}>−</button>
+      <input
+        type="number"
+        value={value}
+        min={min}
+        max={max}
+        onChange={(e) => set(Math.max(min, Math.min(max, Number(e.target.value) || min)))}
+      />
+      <button onClick={() => set(Math.min(max, value + step))}>+</button>
+    </div>
+  );
+}

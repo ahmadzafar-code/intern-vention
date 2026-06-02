@@ -34,3 +34,18 @@ export const GRAD_CLASS_YEARS = (() => {
 })();
 
 export const GPA_BUCKETS = ["3.9 – 4.0", "3.7 – 3.9", "3.4 – 3.7", "3.0 – 3.4", "Below 3.0", "Prefer not to say"];
+
+// Default role options per industry (prototype roleSets) — seed the contribute form's
+// Role select so the first contributor at a company still has sensible options.
+export const ROLE_SETS: Record<string, string[]> = {
+  tech: ["SWE Intern", "ML Research Intern", "New Grad SWE", "Member of Technical Staff", "Product Manager"],
+  finance: ["IB Summer Analyst", "S&T Intern", "Quant Strat Intern", "New Grad Analyst"],
+  consulting: ["Summer Associate", "Business Analyst", "Data Science Intern"],
+  quant: ["Quant Trading Intern", "Quant Research Intern", "SWE Intern"],
+  startups: ["SWE Intern", "Founding Eng (New Grad)", "Product Intern"],
+  design: ["Product Design Intern", "Brand Design Intern"],
+};
+
+export function rolesForIndustry(industry: string): string[] {
+  return ROLE_SETS[industry] ?? ROLE_SETS.tech;
+}
