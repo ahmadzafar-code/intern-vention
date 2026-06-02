@@ -63,13 +63,22 @@ export default async function CompanyPage({
           <h1>{company.name}</h1>
           <div className="company-meta">
             <span>{cap(company.industry)}</span>
-            <span className="pip" />
-            <span>{total === 0 ? "No reports yet" : `${total} report${total === 1 ? "" : "s"}`}</span>
+            {total > 0 && (
+              <>
+                <span className="pip" />
+                <span>{total} report{total === 1 ? "" : "s"}</span>
+              </>
+            )}
             <span className="pip" />
             <span>{roles.length} roles tracked</span>
           </div>
         </div>
-        <FollowButton slug={slug} following={following} />
+        <div className="company-actions" style={{ display: "flex", gap: 10, flexShrink: 0, alignItems: "center" }}>
+          <Link href={`/contribute/${slug}`} className="follow-btn" style={{ background: "var(--accent)", color: "#fff", borderColor: "var(--accent)" }}>
+            + Contribute
+          </Link>
+          <FollowButton slug={slug} following={following} />
+        </div>
       </header>
 
       <CompanyControls roles={roles} current={filters} />

@@ -94,11 +94,9 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
                 <div className="tile-name">{c.name}</div>
                 <div className="tile-meta">
                   <span className="ind">{c.industry}</span>
-                  <span className="sep">·</span>
-                  {c.reports === 0 ? (
-                    <span className="num-new">No reports yet</span>
-                  ) : (
+                  {c.reports > 0 && (
                     <>
+                      <span className="sep">·</span>
                       <span className="num">{c.reports}</span> reports
                     </>
                   )}
