@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isUnlocked } from "@/lib/session";
 import { FollowButton } from "@/components/company/FollowButton";
 import { getCompany, getCompanyRoles } from "@/lib/queries/companies";
 import { cohortReport, MIN } from "@/lib/queries/report";
@@ -35,17 +34,19 @@ export default async function CompanyPage({
     gpa: str(sp.gpa) || "All",
   };
 
+  // One auth() call, and the unlock-count + roles + total + follow all run in parallel
+  // (cohortReport needs `unlocked`, so it follows). Co-located with the DB this is fast.
   const session = await auth();
-  const unlocked = await isUnlocked();
-  const [report, roles, total, follow] = await Promise.all([
-    cohortReport(slug, filters, unlocked),
+  const userId = session?.user?.id ?? null;
+  const [unlockedCount, roles, total, follow] = await Promise.all([
+    userId ? prisma.contribution.count({ where: { userId } }) : Promise.resolve(0),
     getCompanyRoles(slug, company.industry),
     prisma.contribution.count({ where: { companySlug: slug } }),
-    session?.user
-      ? prisma.follow.findUnique({ where: { userId_companySlug: { userId: session.user.id, companySlug: slug } }, select: { id: true } })
-      : Promise.resolve(null),
+    userId ? prisma.follow.findUnique({ where: { userId_companySlug: { userId, companySlug: slug } }, select: { id: true } }) : Promise.resolve(null),
   ]);
+  const unlocked = unlockedCount >= 1;
   const following = follow !== null;
+  const report = await cohortReport(slug, filters, unlocked);
 
   return (
     <main className="main" style={{ maxWidth: 1180, margin: "0 auto", padding: "var(--page-pad)" }}>
