@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
+import { isStanfordEmail } from "@/lib/stanford";
 
 // NextAuth v5, JWT strategy (no Prisma adapter — the schema has no Account/Session
 // tables by design). The User row is upserted by hand in the jwt callback.
@@ -17,9 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     // HARD GATE: reject any non-@stanford.edu or unverified Google account, server-side.
     async signIn({ profile }) {
-      const email = profile?.email ?? "";
-      const verified = (profile as { email_verified?: boolean })?.email_verified === true;
-      return email.endsWith("@stanford.edu") && verified;
+      return isStanfordEmail(profile?.email, (profile as { email_verified?: boolean })?.email_verified);
     },
 
     async jwt({ token, profile }) {
