@@ -16,8 +16,11 @@ const REFERRAL_SOURCES = [
   "Stanford student club", "Coffee chat", "Cold email", "LinkedIn cold outreach", "Previous workplace",
   "Research lab", "Professor", "Friend", "Classmate", "Other",
 ];
-const APPLIED_MONTHS = ["Aug 2025", "Sept 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026"];
-const OFFER_MONTHS = ["Sept 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026", "Mar 2026"];
+// Month + year are picked independently so any application/offer date works — not just the current
+// cycle. The two are recombined into "MMM YYYY", the exact format lib/aggregate.ts monthCounts()
+// parses (first token, "Sept"→"Sep") to bin the timing chart, so storage/reporting is unchanged.
+const MONTH_ABBREVS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+const YEARS = Array.from({ length: 2030 - 2015 + 1 }, (_, i) => String(2030 - i)); // 2030 → 2015 (desc)
 
 type FormCompany = LogoCompany & { slug: string; name: string };
 type Profile = { major: string | null; gradYear: string | null; gpa: string | null };
@@ -37,8 +40,10 @@ export function ContributeForm({ company, roles, profile, pending }: { company: 
   const [customReferral, setCustomReferral] = useState("");
   const [techRounds, setTechRounds] = useState(3);
   const [behavioralRounds, setBehavioralRounds] = useState(1);
-  const [applied, setApplied] = useState("Sept 2025");
-  const [offerMonth, setOfferMonth] = useState("Nov 2025");
+  const [appliedMonth, setAppliedMonth] = useState("Sept");
+  const [appliedYear, setAppliedYear] = useState("2026");
+  const [offerMonth, setOfferMonth] = useState("Nov");
+  const [offerYear, setOfferYear] = useState("2026");
   const [comp, setComp] = useState("$8–10k/mo · ~$96–120k/yr");
   const [advice, setAdvice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -60,8 +65,8 @@ export function ContributeForm({ company, roles, profile, pending }: { company: 
       referralSource: finalReferral,
       techRounds,
       behavioralRounds,
-      applied,
-      offerMonth,
+      applied: `${appliedMonth} ${appliedYear}`,
+      offerMonth: `${offerMonth} ${offerYear}`,
       comp,
       advice,
     });
@@ -218,10 +223,16 @@ export function ContributeForm({ company, roles, profile, pending }: { company: 
           </div>
           <div className="form-grid" style={{ marginTop: 12 }}>
             <Field label="Applied">
-              <Select value={applied} set={setApplied} options={APPLIED_MONTHS} />
+              <div className="month-year">
+                <Select value={appliedMonth} set={setAppliedMonth} options={MONTH_ABBREVS} />
+                <Select value={appliedYear} set={setAppliedYear} options={YEARS} />
+              </div>
             </Field>
             <Field label="Final offer received">
-              <Select value={offerMonth} set={setOfferMonth} options={OFFER_MONTHS} />
+              <div className="month-year">
+                <Select value={offerMonth} set={setOfferMonth} options={MONTH_ABBREVS} />
+                <Select value={offerYear} set={setOfferYear} options={YEARS} />
+              </div>
             </Field>
           </div>
         </section>
