@@ -9,9 +9,9 @@ function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-// New companies enter a PENDING review queue (and a PENDING Company row, hidden from the
-// directory) — they go live only when an admin approves. Returns the slug so the caller
-// routes the user into the contribute form (their story ships with the request).
+// New companies go live immediately (APPROVED) — no review queue. We still record an
+// (auto-approved) CompanyRequest as an audit trail of who added what. Returns the slug so the
+// caller routes the user into the contribute form to add their story.
 export async function requestCompany(input: {
   name: string;
   website: string;
@@ -26,23 +26,21 @@ export async function requestCompany(input: {
 
   const existing = await prisma.company.findUnique({ where: { slug }, select: { status: true } });
   if (existing) {
-    return {
-      ok: false,
-      error: existing.status === "APPROVED" ? "That company already exists — search for it instead." : "That company is already pending review.",
-    };
+    return { ok: false, error: "That company already exists — search for it instead." };
   }
 
   const domain = input.website.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "") || `${slug}.com`;
   try {
     await prisma.$transaction([
-      prisma.company.create({ data: { slug, name, industry: input.industry, domain, bg: TILE_BGS[slug.length % TILE_BGS.length], status: "PENDING", createdBy: user.id } }),
-      prisma.companyRequest.create({ data: { name, slug, industry: input.industry, website: input.website.trim() || null, note: input.note.trim() || null, status: "PENDING", userId: user.id } }),
+      prisma.company.create({ data: { slug, name, industry: input.industry, domain, bg: TILE_BGS[slug.length % TILE_BGS.length], status: "APPROVED", createdBy: user.id } }),
+      prisma.companyRequest.create({ data: { name, slug, industry: input.industry, website: input.website.trim() || null, note: input.note.trim() || null, status: "APPROVED", reviewedAt: new Date(), userId: user.id } }),
     ]);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return { ok: false, error: "That company already exists." };
     throw e;
   }
   revalidatePath("/contribute");
+  revalidatePath("/"); // new company shows in the directory immediately
   return { ok: true, slug };
 }
 

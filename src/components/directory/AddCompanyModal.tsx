@@ -37,13 +37,13 @@ export function AddCompanyModal({ onClose }: { onClose: () => void }) {
     <div className="modal-scrim" onClick={onClose}>
       <div className="composer" onClick={(e) => e.stopPropagation()}>
         <div className="composer-head">
-          <h3>Request a new company · Step 1 of 2</h3>
+          <h3>Add a new company · Step 1 of 2</h3>
           <button className="icon-btn" onClick={onClose}><Icon name="x" size={18} /></button>
         </div>
         <div className="composer-body">
           <div className="req-banner">
-            <Icon name="lock" size={13} /> New companies are <strong>reviewed by our team</strong> before going live.
-            Next you&apos;ll add your recruiting story — it ships with the request and goes live when approved.
+            <Icon name="check-circle" size={13} /> New companies <strong>go live instantly</strong>. Next you&apos;ll add
+            your recruiting story — it publishes with the company and unlocks the cohort report right away.
           </div>
           <label className="composer-label">Company name</label>
           <input className="composer-input" value={name} maxLength={40} autoFocus placeholder="e.g. Mercor, Sierra, Cognition…" onChange={(e) => setName(e.target.value)} />
@@ -62,7 +62,7 @@ export function AddCompanyModal({ onClose }: { onClose: () => void }) {
           <textarea className="composer-textarea" value={note} maxLength={200} placeholder="e.g. seed-stage AI startup, ~20 people, hires Stanford interns…" onChange={(e) => setNote(e.target.value)} />
         </div>
         <div className="composer-foot">
-          <span className="composer-note">Reviewed to prevent duplicates · usually &lt; 48h</span>
+          <span className="composer-note">Goes live immediately · please avoid duplicates</span>
           <button className={"primary-btn" + (canSubmit ? "" : " disabled")} onClick={submit}>
             {busy ? "Saving…" : "Continue to your story →"}
           </button>

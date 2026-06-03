@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { FollowButton } from "@/components/company/FollowButton";
 import { getCompany, getCompanyRoles } from "@/lib/queries/companies";
-import { cohortReport, MIN } from "@/lib/queries/report";
+import { cohortReport } from "@/lib/queries/report";
 import { Logo } from "@/components/primitives/Logo";
 import { Icon } from "@/components/primitives/Icon";
 import { CompanyControls } from "@/components/company/CompanyControls";
@@ -108,14 +108,13 @@ export default async function CompanyPage({
           <div className="cle-icon">
             <Icon name="sparkle" size={24} />
           </div>
-          <h2>{report.n === 0 ? `No reports for ${company.name} yet` : `Not enough reports yet — ${report.n} of ${MIN}`}</h2>
+          <h2>No reports for {company.name} yet</h2>
           <p>
-            {report.n === 0
-              ? `This company is live in the directory, but no one has contributed a ${company.name} recruiting story for this filter yet. Be the first — your report starts the cohort data and unlocks the community.`
-              : `Aggregates stay hidden until ${MIN} contributions match, so no single person is identifiable. Be early — your story helps cross the line.`}
+            This company is live in the directory, but no one has contributed a {company.name} recruiting
+            story for this filter yet. Be the first — your report starts the cohort data and unlocks the community.
           </p>
           <Link className="primary-btn" href={`/contribute/${slug}`}>
-            {report.n === 0 ? "Be the first to contribute →" : "Contribute →"}
+            Be the first to contribute →
           </Link>
         </div>
       ) : (

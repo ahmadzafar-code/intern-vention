@@ -1,34 +1,26 @@
 import { describe, it, expect } from "vitest";
 import { pctGroups, mode, medianByOrder, monthCounts, compShort, MIN } from "@/lib/aggregate";
 
-describe("pctGroups — per-group n≥5 privacy guard", () => {
-  it("names groups with ≥5 and folds smaller ones into Other", () => {
+describe("pctGroups — names every non-empty group (MIN=1, fold disabled)", () => {
+  it("names all groups by descending pct, with no Other fold", () => {
     const vals = [...Array(6).fill("CS"), ...Array(5).fill("SymSys"), ...Array(3).fill("Econ"), "Physics"]; // 15
     const out = pctGroups(vals, vals.length);
-    const labels = out.map((s) => s.label);
-    expect(labels).toContain("CS");
-    expect(labels).toContain("SymSys");
-    expect(labels).not.toContain("Econ"); // 3 < 5 → folded
-    expect(labels).not.toContain("Physics"); // 1 < 5 → folded
-    expect(out.find((s) => s.label === "Other")?.pct).toBe(Math.round((4 / 15) * 100));
+    expect(out.map((s) => s.label)).toEqual(["CS", "SymSys", "Econ", "Physics"]);
+    expect(out.map((s) => s.label)).not.toContain("Other");
+    expect(out.find((s) => s.label === "CS")?.pct).toBe(Math.round((6 / 15) * 100));
+    expect(out.find((s) => s.label === "Physics")?.pct).toBe(Math.round((1 / 15) * 100));
   });
 
-  it("emits no Other when every group is ≥5", () => {
-    const vals = [...Array(5).fill("A"), ...Array(5).fill("B")];
+  it("keeps even single-member groups (nothing folds)", () => {
+    const vals = ["a", "a", "b", "b", "c"];
     expect(
-      pctGroups(vals, 10)
+      pctGroups(vals, 5)
         .map((s) => s.label)
         .sort()
-    ).toEqual(["A", "B"]);
+    ).toEqual(["a", "b", "c"]);
   });
 
-  it("withholds every group when all are below the floor (only Other remains)", () => {
-    const vals = ["a", "a", "b", "b", "c"]; // no group ≥5
-    const out = pctGroups(vals, 5);
-    expect(out.map((s) => s.label)).toEqual(["Other"]);
-  });
-
-  it("MIN floor is 5", () => expect(MIN).toBe(5));
+  it("MIN floor is 1", () => expect(MIN).toBe(1));
 });
 
 describe("mode / medianByOrder / compShort / monthCounts", () => {

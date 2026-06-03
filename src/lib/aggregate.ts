@@ -3,13 +3,15 @@ import { MONTHS } from "@/lib/constants";
 // Pure aggregation helpers for the cohort report — no DB, no server-only — so the
 // privacy-critical n≥5 grouping logic is unit-testable in isolation.
 
-// The privacy floor: any named group must have ≥ MIN contributions or it folds into "Other".
-export const MIN = 5;
+// Minimum cohort/group size to surface an aggregate. Set to 1 so a report appears from the very
+// first contribution. NOTE: this intentionally lifts the original n≥5 anonymity floor — with small
+// cohorts an aggregate can reflect (and so reveal) a single contributor.
+export const MIN = 1;
 
 export type Slice = { label: string; pct: number };
 
-// Only groups with ≥ MIN are named; smaller groups fold into "Other" so no single small
-// group (hence no single contributor) is exposed. This is the per-group n≥5 guard.
+// Groups with ≥ MIN are named; anything smaller folds into "Other". With MIN=1 every non-empty
+// group is named and nothing folds — the per-group fold is effectively off.
 export function pctGroups(values: string[], total: number): Slice[] {
   const counts = new Map<string, number>();
   for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
