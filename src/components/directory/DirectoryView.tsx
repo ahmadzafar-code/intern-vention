@@ -25,17 +25,23 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
     return true;
   });
   const hasSearch = !!q || industry !== "all";
+  const totalReports = companies.reduce((sum, c) => sum + c.reports, 0); // total internventions recorded across all companies
 
   return (
     <main className="page">
       <section className="hero">
         <div className="hero-eyebrow">Intern<span className="dot">·</span>vention</div>
         <h1>
-          Where &amp; how Stanford <span className="accent">recruited</span> this cycle.
+          The annual <span className="accent">Intern·vention</span> we deserved but never received.
         </h1>
         <p className="hero-sub">
-          Anonymized recruiting accounts from Stanford undergrads, grads, and coterms. Research where you&apos;re headed
-          next — see what actually worked.
+          For Stanford students — by Stanford students, alums &amp; grads.
+        </p>
+        <p className="hero-tagline">
+          What&apos;s not on your LinkedIn?
+          <span className="hero-tagline-count">
+            {totalReports} internvention{totalReports === 1 ? "" : "s"} recorded
+          </span>
         </p>
         <div className="hero-search-wrap">
           <span className="hero-search-icon">
