@@ -78,7 +78,9 @@ export function ContributeForm({ company, roles, profile, pending }: { company: 
     fireConfetti();
     toast("Unlocked! +120 karma · earned Verified + Storyteller", { icon: "check", tone: "good", duration: 3400 });
     await update(); // flip the nav's unlocked hint (the report page reads truth from the DB)
-    setTimeout(() => router.push(`/company/${company.slug}`), 450);
+    // A pending company has no public page yet (/company/[slug] 404s until approved), so land on
+    // My Contributions — it shows the new entry with a "Goes live when approved" note.
+    setTimeout(() => router.push(pending ? "/me" : `/company/${company.slug}`), 450);
   };
 
   const profileLine = profile.major

@@ -62,5 +62,6 @@ export async function contribute(input: ContributeInput): Promise<{ ok: true } |
   revalidatePath(`/company/${input.slug}`);
   revalidatePath("/");
   revalidatePath("/contribute");
+  revalidatePath("/me"); // the post-contribute landing (esp. for pending companies)
   return { ok: true };
 }
