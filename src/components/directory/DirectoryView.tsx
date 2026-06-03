@@ -25,7 +25,6 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
     return true;
   });
   const hasSearch = !!q || industry !== "all";
-  const totalReports = companies.reduce((sum, c) => sum + c.reports, 0); // total internventions recorded across all companies
 
   return (
     <main className="page">
@@ -38,15 +37,6 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
         <p className="hero-sub">
           For Stanford students — by Stanford students, alums &amp; grads.
         </p>
-        <p className="hero-tagline">
-          What&apos;s not on your LinkedIn?
-          <span className="hero-tagline-count">
-            {totalReports} internvention{totalReports === 1 ? "" : "s"} recorded
-          </span>
-        </p>
-        <Link href="/contribute" className="hero-share">
-          Share what&apos;s not on your LinkedIn? <Icon name="chevron-right" size={14} />
-        </Link>
         <div className="hero-search-wrap">
           <span className="hero-search-icon">
             <Icon name="search" size={18} />
