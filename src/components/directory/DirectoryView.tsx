@@ -34,6 +34,7 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
         <h1>
           The annual <span className="accent">Intern·vention</span> we deserved but never received.
         </h1>
+        <p className="hero-q">How to get that job?</p>
         <p className="hero-sub">
           For Stanford students — by Stanford students, alums &amp; grads.
         </p>
@@ -43,6 +44,9 @@ export function DirectoryView({ companies }: { companies: DirCompany[] }) {
             {totalReports} internvention{totalReports === 1 ? "" : "s"} recorded
           </span>
         </p>
+        <Link href="/contribute" className="hero-share">
+          Share what&apos;s not on your LinkedIn? <Icon name="chevron-right" size={14} />
+        </Link>
         <div className="hero-search-wrap">
           <span className="hero-search-icon">
             <Icon name="search" size={18} />
